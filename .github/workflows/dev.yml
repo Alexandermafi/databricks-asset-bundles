@@ -1,0 +1,57 @@
+name: Deploy to dev
+
+concurrency: 1
+
+on:
+  push:
+    branches:
+      - 'develop/**'
+      - '!main'
+      - '!releases/**'
+
+jobs:
+  deploy:
+    name: "Deploy bundle"
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      - uses: databricks/setup-cli@main
+
+      - run: databricks bundle deploy
+        env:
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_DEV }}
+          DATABRICKS_BUNDLE_ENV: dev
+
+#   pipeline_update:
+#     name: "Run pipeline update"
+#     runs-on: ubuntu-latest
+
+#     needs:
+#       - deploy
+
+#     steps:
+#       - uses: actions/checkout@v3
+
+# #       - uses: actions/setup-python@v4
+# #         with:
+# #           python-version: 3.11
+# #           cache: 'pip'
+
+# #       - run: pip install -r requirements.txt
+# #         working-directory: .github/support
+
+#       - uses: databricks/setup-cli@main
+
+#       - shell: bash
+#         name: Run pipeline update
+#         run: |
+#           set -o pipefail
+#           databricks bundle run github_actions_bundle_job --refresh-all 2>&1 | tee output.log
+#         env:
+#           DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN_DEV }}
+#           DATABRICKS_BUNDLE_ENV: dev
